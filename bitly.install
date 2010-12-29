@@ -1,0 +1,66 @@
+<?php
+function bitly_schema() {
+  $schema['bitly_auth'] = array(
+    'description' => t('Stores bit.ly authentication tokens for each user.'),
+    'fields' => array(
+      'uid' => array(
+        'description' => t('User ID.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'login' => array(
+        'description' => t("The user's bit.ly login."),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => ''),
+      'token' => array(
+        'description' => t("The user's bit.ly token."),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => ''),
+      'key' => array(
+        'description' => t("The user's bit.ly api key."),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => ''),
+      ),
+    'primary key' => array('uid'),
+    );
+  $schema['bitly_hash'] = array(
+    'description' => t('Storage for bitly'),
+    'fields' => array(
+      'hid' => array(
+        'description' => t('The primary identifier for a hash.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'uid' => array(
+        'description' => t('ID of user who created this hash.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+      'hash' => array(
+        'description' => t('Hash provided by bit.ly.'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => ''),
+      'url' => array(
+        'description' => t('The full url of the link before hashing.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''),
+      ),
+    'unique keys' => array(
+      'hash'     => array('hash'),
+      ),
+    'primary key' => array('hid'),
+    );
+
+  return $schema;
+}

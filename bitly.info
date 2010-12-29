@@ -1,0 +1,5 @@
+; $Id$
+name = "bit.ly"
+description = "Provides API access to bit.ly to other modules.  Enable this module only if required by another."
+core = 6.x
+package = bit.ly
