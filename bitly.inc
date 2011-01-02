@@ -12,14 +12,26 @@
  * @author Robin Monks <devlinks@gmail.com>
  */
 
-// the bitlyKey assigned to your bit.ly account (http://bit.ly/a/account)
+/**
+ * The bitlyKey assigned to your bit.ly account. (http://bit.ly/a/account)
+ */
 define('bitlyKey', 'YOUR_BITLY_ASSIGNED_KEY');
-// the bitlyLogin assigned to your bit.ly account (http://bit.ly/a/account)
+
+/**
+ * The bitlyLogin assigned to your bit.ly account. (http://bit.ly/a/account)
+ */
 define('bitlyLogin' , 'YOUR_BITLY_LOGIN');
-// the client_id assigned to your OAuth app (http://bit.ly/a/account)
+
+/**
+ * The client_id assigned to your OAuth app. (http://bit.ly/a/account)
+ */
 define('bitly_clientid' , 'YOUR_BITLY_ASSIGNED_CLIENT_ID_FOR_OAUTH');
-// the client_secret assigned to your OAuth app (http://bit.ly/a/account)
+
+/**
+ * The client_secret assigned to your OAuth app. (http://bit.ly/a/account)
+ */
 define('bitly_secret' , 'YOUR_BITLY_ASSIGNED_CLIENT_SECRET_FOR_OAUTH');
+
 
 /**
  * The URI of the standard bitly v3 API.

@@ -1,1 +1,94 @@
 <?php
+
+/**
+ * @file
+ *   Basic module to provide access and storage of bit.ly shortened URLs.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function bitly_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#shorten":
+      return '<p>'. t("This module provides a framework for other Drupal " .
+                      "modules to shorten URLs and display statistics using " .
+                      "the bit.ly service.") .'</p>';
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function bitly_menu() {
+  $items = array();
+  $items['admin/settings/bitly'] = array(
+    'title' => 'Bit.ly',
+    'description' => 'Provide global options for the bit.ly module.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bitly_admin'),
+    'access arguments' => array('access administration pages'),
+  );
+  $items['bitly_auth'] = array(
+    'title' => 'Validate bit.ly credentials',
+    'page callback' => '_bitly_oauth',
+    'access arguments' => array('use own bit.ly login'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function bitly_perm() {
+  return array('use own bit.ly login', 'use bit.ly');
+}
+
+/**
+ * Admin settings page.
+ */
+function bitly_admin($form_state) {
+  $form['bitly_keys'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Bit.ly API Credentials'),
+    '#description' => t('Please supply the bit.ly API credentials that will be used globally. These API credentials will be used in any case where a user either does not or cannot supply their own credentials. !here.', array('!here' => l('Find your credentials', 'http://bit.ly/a/your_api_key'))),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['bitly_keys']['bitly_login'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Bit.ly Login'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('bitly_login', ''),
+    '#description' => t('This field is case-sensitive.'),
+  );
+  $form['bitly_keys']['bitly_key'] = array(
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#title' => t('Bit.ly API Key'),
+    '#default_value' => variable_get('bitly_key', ''),
+    '#description' => t('This field is case-sensitive.'),
+  );
+  $form['bitly_oauth'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Bit.ly OAuth Credentials'),
+    '#description' => t('Please supply OAuth to allow users to log into their bit.ly accounts by clicking a sign-in link rather than needing to enter an API key. Currently you must !request directly from bit.ly.', array('!request' => l('request OAuth access', 'http://code.google.com/p/bitly-api/wiki/ApiDocumentation#OAuth'))),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['bitly_oauth']['bitly_client_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Bit.ly OAuth client_id'),
+    '#default_value' => variable_get('bitly_client_id', ''),
+    '#description' => t('This field is case-sensitive.'),
+  );
+  $form['bitly_oauth']['bitly_client_secret'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Bit.ly OAuth client_secret'),
+    '#default_value' => variable_get('bitly_client_secret', ''),
+    '#description' => t('This field is case-sensitive.'),
+  );
+
+  return system_settings_form($form);
+}

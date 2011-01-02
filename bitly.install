@@ -1,4 +1,9 @@
 <?php
+// $Id$
+
+/**
+ * Implementation of hook_schema().
+ */
 function bitly_schema() {
   $schema['bitly_auth'] = array(
     'description' => t('Stores bit.ly authentication tokens for each user.'),
