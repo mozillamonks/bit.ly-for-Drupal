@@ -69,3 +69,22 @@ function bitly_schema() {
 
   return $schema;
 }
+
+/**
+ * Implementation of hook_schema().
+ */
+function bitly_install() {
+  drupal_install_schema('bitly');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function bitly_uninstall() {
+  drupal_uninstall_schema('bitly');
+  
+/*  variable_del('bitly_login');
+  variable_del('bitly_key');
+  variable_del('bitly_client_id');
+  variable_del('bitly_client_secret');*/ // commented out to save headaches during development.
+}

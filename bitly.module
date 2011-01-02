@@ -29,7 +29,7 @@ function bitly_menu() {
     'page arguments' => array('bitly_admin'),
     'access arguments' => array('access administration pages'),
   );
-  $items['bitly_auth'] = array(
+  $items['bitly_oauth'] = array(
     'title' => 'Validate bit.ly credentials',
     'page callback' => '_bitly_oauth',
     'access arguments' => array('use own bit.ly login'),
@@ -89,6 +89,48 @@ function bitly_admin($form_state) {
     '#default_value' => variable_get('bitly_client_secret', ''),
     '#description' => t('This field is case-sensitive.'),
   );
+  $form['bitly_oauth']['bitly_oauth_test'] = array(
+    '#value' => t('!test', array('!test' => l('Test OAuth', 'bitly_oauth')))
+  );
 
   return system_settings_form($form);
+}
+
+/**
+ * Handles user OAuth interaction.
+ */
+function _bitly_oauth() {
+  global $user;
+  $client_id = variable_get('bitly_client_id', '');
+  global $base_root;
+  $redirect_uri = $base_root . base_path() . 'bitly_oauth';
+  if(empty($_REQUEST['code'])) {
+    drupal_goto("https://bit.ly/oauth/authorize?client_id=$client_id&redirect_uri=$redirect_uri");
+  }
+  else {
+    _bitly_inc();
+    $results = bitly_oauth_access_token($_REQUEST['code'], $redirect_uri);
+    if(!empty($results)) {
+      $array = array(
+        'uid' => $user->uid,
+        'login' => $results['login'],
+        'token' => $results['access_token'],
+        'key' => $results['apiKey'],
+      );
+      $error = drupal_write_record('bitly_auth', $array);
+      print_r($error);
+    }
+  }
+  
+}
+
+/**
+ * Helper function to create proper defines before loading bitly.inc.
+ */
+function _bitly_inc() {
+  define('bitlyKey', variable_get('bitly_key', ''));
+  define('bitlyLogin', variable_get('bitly_login', ''));
+  define('bitly_clientid', variable_get('bitly_client_id', ''));
+  define('bitly_secret', variable_get('bitly_client_secret', ''));
+  module_load_include('inc', 'bitly');
 }

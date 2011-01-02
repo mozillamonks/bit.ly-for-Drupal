@@ -1,4 +1,4 @@
-<?
+<?php
 // $Id$
 
 /**
@@ -11,27 +11,6 @@
  * @author Kevin Marshall <info@falicon.com>
  * @author Robin Monks <devlinks@gmail.com>
  */
-
-/**
- * The bitlyKey assigned to your bit.ly account. (http://bit.ly/a/account)
- */
-define('bitlyKey', 'YOUR_BITLY_ASSIGNED_KEY');
-
-/**
- * The bitlyLogin assigned to your bit.ly account. (http://bit.ly/a/account)
- */
-define('bitlyLogin' , 'YOUR_BITLY_LOGIN');
-
-/**
- * The client_id assigned to your OAuth app. (http://bit.ly/a/account)
- */
-define('bitly_clientid' , 'YOUR_BITLY_ASSIGNED_CLIENT_ID_FOR_OAUTH');
-
-/**
- * The client_secret assigned to your OAuth app. (http://bit.ly/a/account)
- */
-define('bitly_secret' , 'YOUR_BITLY_ASSIGNED_CLIENT_SECRET_FOR_OAUTH');
-
 
 /**
  * The URI of the standard bitly v3 API.
@@ -605,7 +584,7 @@ function bitly_oauth_access_token($code, $redirect) {
   $params['client_secret'] = bitly_secret;
   $params['code'] = $code;
   $params['redirect_uri'] = $redirect;
-  $output = json_decode(bitly_post_curl($url, $params));
+  $output = bitly_post_curl($url, $params);
   $parts = explode('&', $output);
   foreach ($parts as $part) {
     $bits = explode('=', $part);
