@@ -198,6 +198,7 @@ function _bitly_oauth() {
 
 /**
  * Helper function to create proper defines before loading bitly.inc.
+ * Call this function before any of the other bitly_* functions in bitly.inc.
  */
 function _bitly_inc() {
   define('bitlyKey', variable_get('bitly_key', ''));
@@ -205,4 +206,23 @@ function _bitly_inc() {
   define('bitly_clientid', variable_get('bitly_client_id', ''));
   define('bitly_secret', variable_get('bitly_client_secret', ''));
   module_load_include('inc', 'bitly');
+}
+
+/**
+ * Wrapper function to prefill bitly_v3_shorten with current user's login.
+ */
+function bitly_user_shorten($longUrl, $domain = '', $account = NULL) {
+  if (empty($account)) {
+    global $user;
+    if (empty($user->uid)) { // Anonymous user, 0 is also considered empty.
+      return bitly_v3_shorten($longUrl, $domain);
+    }
+    $account = $user->uid;
+  }
+  
+  $search = db_query("SELECT * FROM {bitly_auth} WHERE uid = %d", $user->uid);
+  if ($auth = db_fetch_object($search)) {
+    return bitly_v3_shorten($longUrl, $domain, $auth->login, $auth->apikey);
+  }
+  return FALSE;
 }

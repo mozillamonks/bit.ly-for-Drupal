@@ -10,3 +10,6 @@ by clicking the "Short URL" link in the node links.
 IMPORTANT NOTE: This module requires you have a bit.ly account to work
 properly, after installation, please go to /admin/settings/bitly to
 authenticate and begin using the module.
+
+bitly.inc comes from https://github.com/Falicon/BitlyPHP and is also released
+under the GPL.
