@@ -25,7 +25,7 @@ function bitly_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => ''),
-      'key' => array(
+      'apikey' => array(
         'description' => t("The user's bit.ly api key."),
         'type' => 'varchar',
         'length' => 64,

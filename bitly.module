@@ -29,6 +29,14 @@ function bitly_menu() {
     'page arguments' => array('bitly_admin'),
     'access arguments' => array('access administration pages'),
   );
+  $items['user/%user/bitly'] = array(
+    'title' => 'Bit.ly', 
+    'page callback' => 'bitly_preferences', 
+    'page arguments' => array(1), 
+    'access callback' => 'user_edit_access', 
+    'access arguments' => array(1), 
+    'type' => MENU_LOCAL_TASK, 
+  );
   $items['bitly_oauth'] = array(
     'title' => 'Validate bit.ly credentials',
     'page callback' => '_bitly_oauth',
@@ -89,18 +97,78 @@ function bitly_admin($form_state) {
     '#default_value' => variable_get('bitly_client_secret', ''),
     '#description' => t('This field is case-sensitive.'),
   );
-  $form['bitly_oauth']['bitly_oauth_test'] = array(
-    '#value' => t('!test', array('!test' => l('Test OAuth', 'bitly_oauth')))
-  );
 
   return system_settings_form($form);
 }
+
+/**
+ * Provides a preferences and management page for bit.ly users.
+ */
+function bitly_preferences($account) {
+  $search = db_query("SELECT login FROM {bitly_auth} WHERE uid = %d", $account->uid);
+  if($result = db_result($search)) {
+    $output = t("You're currently linked to the %login bit.ly account.", array('%login' => $result));
+    $output .= drupal_get_form("_bitly_preferences_unlink", $account->uid);
+  }
+  else {
+    $output = t("You currently do not have a !bitly account configured. A bit.ly account is required for tracking statistics of shortened URLs.", array('!bitly' => l('bit.ly', 'http://bit.ly')));
+    $output .= drupal_get_form("_bitly_preferences_link");
+  }
+  return $output;
+}
+
+/**
+ * Provide the "Link bit.ly account" button.
+ */
+function _bitly_preferences_link($form_state) {
+  $form = array();
+  $form['bitly_link'] = array(
+    '#type' => 'submit',
+    '#value' => t('Link my bit.ly account')
+  );
+  return $form;
+}
+
+function _bitly_preferences_link_submit($form, &$form_state) {
+  _bitly_oauth();
+}
+
+/**
+ * Provide the "Un-link bit.ly account" button.
+ */
+function _bitly_preferences_unlink($form_state, $uid) {
+  $form = array();
+  $form['bitly_link'] = array(
+    '#type' => 'submit',
+    '#value' => t('Un-link this account')
+  );
+  $form['bitly_uid'] = array(
+    '#type' => 'value',
+    '#value' => $uid
+  );
+  return $form;
+}
+
+function _bitly_preferences_unlink_submit($form, &$form_state) {
+  $uid = $form_state['values']['bitly_uid'];
+  @db_query("DELETE FROM {bitly_auth} WHERE uid = %d", $uid);
+  drupal_goto('user/' . $uid . '/bitly');
+}
+
 
 /**
  * Handles user OAuth interaction.
  */
 function _bitly_oauth() {
   global $user;
+  
+  // Determine if the user already has a key stored.
+  $search = db_query("SELECT token FROM {bitly_auth} WHERE uid = %d", $user->uid);
+  if(db_result($search)) {
+    drupal_set_message(t("Your user account already has an active bit.ly account definated, please visit your !user_page to change it.", array('!user_page' => l('user page', 'user/' . $user->uid . '/bitly'))));
+    drupal_goto('user/' . $user->uid . '/bitly');
+  }
+  
   $client_id = variable_get('bitly_client_id', '');
   global $base_root;
   $redirect_uri = $base_root . base_path() . 'bitly_oauth';
@@ -110,18 +178,22 @@ function _bitly_oauth() {
   else {
     _bitly_inc();
     $results = bitly_oauth_access_token($_REQUEST['code'], $redirect_uri);
-    if(!empty($results)) {
+    if (!empty($results)) {
       $array = array(
         'uid' => $user->uid,
         'login' => $results['login'],
         'token' => $results['access_token'],
-        'key' => $results['apiKey'],
+        'apikey' => $results['apiKey'],
       );
-      $error = drupal_write_record('bitly_auth', $array);
-      print_r($error);
+      if (empty($array['token'])) {
+        drupal_set_message(t("We were unable to link to your bit.ly account, please try again later."));
+      } else {
+        drupal_write_record('bitly_auth', $array);
+        drupal_set_message(t("Your user account has been sucessfully linked to bit.ly!"));
+      }
     }
   }
-  
+  drupal_goto('user/' . $user->uid . '/bitly');
 }
 
 /**
